@@ -88,6 +88,7 @@ ENHANCED_TEMPLATE = """
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         :root {
             --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -100,27 +101,88 @@ ENHANCED_TEMPLATE = """
             background: var(--primary-gradient); 
             min-height: 100vh; 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding-top: 60px; /* Space for fixed header */
         }
         
-        .main-nav {
+        /* Compact Fixed Header */
+        .main-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
             background: rgba(255,255,255,0.98);
+            backdrop-filter: blur(10px);
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            padding: 15px 0;
-            margin-bottom: 30px;
+            z-index: 1000;
+            border-bottom: 2px solid rgba(102, 126, 234, 0.2);
+        }
+        
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
+        
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo-icon {
+            background: var(--primary-gradient);
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+        
+        .logo-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .nav-pills {
+            display: flex;
+            gap: 5px;
+            margin: 0;
+            padding: 4px;
+            background: rgba(0,0,0,0.05);
+            border-radius: 25px;
         }
         
         .nav-link {
-            color: #495057;
+            color: #666;
             font-weight: 500;
-            padding: 10px 20px;
-            margin: 0 5px;
-            border-radius: 25px;
+            font-size: 13px;
+            padding: 6px 16px;
+            border-radius: 20px;
             transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+        
+        .nav-link i {
+            font-size: 12px;
         }
         
         .nav-link:hover {
-            background: rgba(118, 75, 162, 0.1);
-            color: #764ba2;
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
         }
         
         .nav-link.active {
@@ -128,7 +190,11 @@ ENHANCED_TEMPLATE = """
             color: white;
         }
         
-        .container { max-width: 1200px; }
+        .container { 
+            max-width: 1400px;
+            padding: 40px 20px;
+            margin: 0 auto;
+        }
         
         .main-card { 
             background: rgba(255,255,255,0.98); 
@@ -136,6 +202,19 @@ ENHANCED_TEMPLATE = """
             border: none; 
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             border-radius: 15px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+        
+        .card-header {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 15px 15px 0 0 !important;
+        }
+        
+        .card-body {
+            padding: 30px;
         }
         
         .status-badge {
@@ -200,36 +279,37 @@ ENHANCED_TEMPLATE = """
     </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="main-nav">
-        <div class="container">
-            <div class="d-flex justify-content-between align-items-center">
-                <h3 class="mb-0">
-                    <i class="fas fa-network-wired text-primary"></i> InfoBlox NLP System
-                </h3>
-                <div>
-                    <a href="/" class="nav-link {{ 'active' if page == 'home' else '' }}">
-                        <i class="fas fa-home"></i> Query
-                    </a>
-                    <a href="/config" class="nav-link {{ 'active' if page == 'config' else '' }}">
-                        <i class="fas fa-cog"></i> Config
-                    </a>
-                    <a href="/mcp-config" class="nav-link {{ 'active' if page == 'mcp-config' else '' }}">
-                        <i class="fas fa-server"></i> MCP Config
-                    </a>
-                    <a href="/mcp-tools" class="nav-link {{ 'active' if page == 'mcp-tools' else '' }}">
-                        <i class="fas fa-tools"></i> MCP Tools
-                    </a>
+    <!-- Compact Fixed Header -->
+    <header class="main-header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo-icon">
+                    <i class="fas fa-network-wired"></i>
                 </div>
+                <div class="logo-text">InfoBlox NLP System</div>
             </div>
+            
+            <nav class="nav-pills">
+                <a href="/" class="nav-link {{ 'active' if page == 'home' else '' }}">
+                    <i class="fas fa-home"></i> Query
+                </a>
+                <a href="/config" class="nav-link {{ 'active' if page == 'config' else '' }}">
+                    <i class="fas fa-cog"></i> Config
+                </a>
+                <a href="/mcp-config" class="nav-link {{ 'active' if page == 'mcp-config' else '' }}">
+                    <i class="fas fa-server"></i> MCP Config
+                </a>
+                <a href="/mcp-tools" class="nav-link {{ 'active' if page == 'mcp-tools' else '' }}">
+                    <i class="fas fa-tools"></i> MCP Tools
+                </a>
+            </nav>
         </div>
-    </nav>
+    </header>
     
     <div class="container">
         {% block content %}{% endblock %}
     </div>
     
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
@@ -1225,30 +1305,165 @@ def home():
 def config_page():
     """Configuration page."""
     config_content = """
+    <style>
+        .config-section {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+        .config-section h5 {
+            color: #495057;
+            margin-bottom: 20px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .form-label {
+            color: #6c757d;
+            font-weight: 500;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            margin-top: 25px;
+        }
+        
+        /* Enhanced Slider Styles */
+        .slider-container {
+            position: relative;
+            padding: 20px 0 30px;
+        }
+        
+        .custom-slider {
+            position: absolute;
+            width: 100%;
+            height: 6px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: transparent;
+            outline: none;
+            z-index: 2;
+            cursor: pointer;
+        }
+        
+        .slider-track {
+            position: absolute;
+            width: 100%;
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            top: 20px;
+            overflow: hidden;
+        }
+        
+        .slider-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 3px;
+            width: 70%;
+            transition: width 0.2s ease;
+        }
+        
+        .custom-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: white;
+            border: 3px solid #667eea;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+            transition: all 0.2s ease;
+        }
+        
+        .custom-slider::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: white;
+            border: 3px solid #667eea;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+            transition: all 0.2s ease;
+        }
+        
+        .custom-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
+        }
+        
+        .custom-slider::-moz-range-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
+        }
+        
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 35px;
+            font-size: 12px;
+            color: #6c757d;
+        }
+        
+        .slider-value-badge {
+            position: absolute;
+            top: -10px;
+            left: 70%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+            transition: left 0.2s ease;
+        }
+        
+        .slider-value-badge::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 4px solid transparent;
+            border-right: 4px solid transparent;
+            border-top: 4px solid #764ba2;
+        }
+    </style>
+    
     <div class="main-card">
-        <div class="card-header bg-gradient text-white">
-            <h4><i class="fas fa-cog"></i> System Configuration</h4>
+        <div class="card-header">
+            <h4 class="mb-0"><i class="fas fa-cog"></i> System Configuration</h4>
         </div>
         <div class="card-body">
             <!-- InfoBlox Settings -->
-            <div class="mb-4">
+            <div class="config-section">
                 <h5><i class="fas fa-server"></i> InfoBlox Connection</h5>
                 <form id="infobloxForm">
-                    <div class="row">
+                    <div class="row g-3">
                         <div class="col-md-4">
-                            <label>Grid Master IP</label>
+                            <label class="form-label">Grid Master IP</label>
                             <input type="text" class="form-control" id="gridMaster" 
                                 value="{{ config.get('INFOBLOX_GRID_MASTER_IP', '') }}" 
                                 placeholder="192.168.1.224">
                         </div>
                         <div class="col-md-4">
-                            <label>Username</label>
+                            <label class="form-label">Username</label>
                             <input type="text" class="form-control" id="username" 
                                 value="{{ config.get('INFOBLOX_USERNAME', '') }}"
                                 placeholder="admin">
                         </div>
                         <div class="col-md-4">
-                            <label>Password</label>
+                            <label class="form-label">Password</label>
                             <input type="password" class="form-control" id="password" 
                                 value="{{ config.get('INFOBLOX_PASSWORD', '') }}"
                                 placeholder="••••••••">
@@ -1261,12 +1476,12 @@ def config_page():
             </div>
             
             <!-- LLM Settings -->
-            <div class="mb-4">
+            <div class="config-section">
                 <h5><i class="fas fa-brain"></i> LLM Provider Settings</h5>
                 <form id="llmForm">
-                    <div class="row mb-3">
+                    <div class="row g-3 mb-3">
                         <div class="col-md-6">
-                            <label>Active Provider</label>
+                            <label class="form-label">Active Provider</label>
                             <select class="form-control" id="llmProvider">
                                 <option value="none">Basic NLP (No LLM)</option>
                                 <option value="openai">OpenAI GPT</option>
@@ -1276,7 +1491,7 @@ def config_page():
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label>API Key</label>
+                            <label class="form-label">API Key</label>
                             <input type="password" class="form-control" id="apiKey" 
                                 placeholder="Enter API key for selected provider">
                         </div>
@@ -1288,27 +1503,39 @@ def config_page():
             </div>
             
             <!-- Advanced Settings -->
-            <div class="mb-4">
+            <div class="config-section">
                 <h5><i class="fas fa-sliders-h"></i> Advanced Settings</h5>
-                <div class="row">
+                <div class="row g-3">
                     <div class="col-md-4">
-                        <label>Confidence Threshold</label>
-                        <input type="range" class="form-range" min="0" max="100" value="70" id="confidenceThreshold">
-                        <small class="text-muted">Current: <span id="confidenceValue">70</span>%</small>
+                        <label class="form-label">Confidence Threshold</label>
+                        <div class="slider-container">
+                            <input type="range" class="custom-slider" min="0" max="100" value="70" id="confidenceThreshold">
+                            <div class="slider-track">
+                                <div class="slider-fill" id="sliderFill"></div>
+                            </div>
+                            <div class="slider-labels">
+                                <span>0%</span>
+                                <span>50%</span>
+                                <span>100%</span>
+                            </div>
+                            <div class="slider-value-badge" id="sliderValueBadge">
+                                <span id="confidenceValue">70</span>%
+                            </div>
+                        </div>
                     </div>
                     <div class="col-md-4">
-                        <label>Max Results</label>
+                        <label class="form-label">Max Results</label>
                         <input type="number" class="form-control" value="50" min="1" max="1000">
                     </div>
                     <div class="col-md-4">
-                        <label>Timeout (seconds)</label>
+                        <label class="form-label">Timeout (seconds)</label>
                         <input type="number" class="form-control" value="30" min="5" max="300">
                     </div>
                 </div>
             </div>
             
             <!-- Actions -->
-            <div class="mt-4">
+            <div class="action-buttons">
                 <button class="btn btn-success" id="exportConfig">
                     <i class="fas fa-download"></i> Export Config
                 </button>
@@ -1324,10 +1551,69 @@ def config_page():
     
     <script>
     $(document).ready(function() {
-        // Update confidence value display
-        $('#confidenceThreshold').on('input', function() {
-            $('#confidenceValue').text($(this).val());
+        // Enhanced slider functionality
+        function updateSlider() {
+            const slider = $('#confidenceThreshold');
+            const value = slider.val();
+            const percentage = value + '%';
+            
+            // Update value display in badge
+            $('#confidenceValue').text(value);
+            
+            // Update slider fill width
+            $('#sliderFill').css('width', percentage);
+            
+            // Update badge position
+            $('#sliderValueBadge').css('left', percentage);
+            
+            // Dynamic color changes based on value
+            let gradientColor, thumbColor, badgeColor;
+            
+            if (value < 30) {
+                gradientColor = 'linear-gradient(90deg, #dc3545 0%, #f86168 100%)';
+                thumbColor = '#dc3545';
+                badgeColor = 'linear-gradient(135deg, #dc3545 0%, #f86168 100%)';
+            } else if (value < 70) {
+                gradientColor = 'linear-gradient(90deg, #ffc107 0%, #ffdb4d 100%)';
+                thumbColor = '#ffc107';
+                badgeColor = 'linear-gradient(135deg, #ffc107 0%, #ffdb4d 100%)';
+            } else {
+                gradientColor = 'linear-gradient(90deg, #667eea 0%, #764ba2 100%)';
+                thumbColor = '#667eea';
+                badgeColor = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+            }
+            
+            $('#sliderFill').css('background', gradientColor);
+            $('#sliderValueBadge').css('background', badgeColor);
+            
+            // Update thumb color with a style tag (since pseudo-elements can't be directly modified)
+            $('#sliderStyles').remove();
+            $('<style id="sliderStyles">')
+                .text(`.custom-slider::-webkit-slider-thumb { border-color: ${thumbColor} !important; }
+                       .custom-slider::-moz-range-thumb { border-color: ${thumbColor} !important; }`)
+                .appendTo('head');
+        }
+        
+        // Bind to both input and change events for better compatibility
+        $('#confidenceThreshold').on('input change', updateSlider);
+        
+        // Also update on mouse events for smoother interaction
+        $('#confidenceThreshold').on('mousemove', function(event) {
+            if (event.buttons === 1) { // Mouse is being dragged
+                updateSlider();
+            }
         });
+        
+        // Debug: Log slider changes to console
+        $('#confidenceThreshold').on('input', function() {
+            console.log('Slider value:', $(this).val());
+        });
+        
+        // Initialize slider on page load
+        updateSlider();
+        
+        // Force update after a short delay to ensure DOM is ready
+        setTimeout(updateSlider, 100);
         
         // Save InfoBlox settings
         $('#infobloxForm').submit(function(e) {
