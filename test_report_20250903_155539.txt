@@ -1,0 +1,76 @@
+InfoBlox WAPI NLP System - Test Report
+Generated: Wed Sep  3 15:55:39 EDT 2025
+
+Summary:
+  Total Tests: 4
+  Passed: 4
+  Failed: 0
+  Skipped: 0
+
+Details:
+
+--- test_flask_api ---
+Test process_query endpoint with invalid JSON. ... ok
+test_process_query_endpoint_missing_query (__main__.TestFlaskAPI.test_process_query_endpoint_missing_query)
+Test process_query endpoint with missing query. ... ok
+test_process_query_endpoint_valid (__main__.TestFlaskAPI.test_process_query_endpoint_valid)
+Test process_query endpoint with valid input. ... ok
+test_query_sanitization (__main__.TestFlaskAPI.test_query_sanitization)
+Test that queries are properly sanitized. ... ok
+test_rate_limiting (__main__.TestFlaskAPI.test_rate_limiting)
+Test rate limiting behavior (if implemented). ... ok
+test_suggestions_autocomplete_behavior (__main__.TestFlaskAPI.test_suggestions_autocomplete_behavior)
+Test autocomplete behavior of suggestions. ... ok
+test_suggestions_endpoint_with_query (__main__.TestFlaskAPI.test_suggestions_endpoint_with_query)
+Test suggestions endpoint with query parameter. ... ok
+test_suggestions_endpoint_without_query (__main__.TestFlaskAPI.test_suggestions_endpoint_without_query)
+Test suggestions endpoint without query parameter. ... ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 0.047s
+
+OK
+
+--- test_nlp_processing ---
+test_entity_type_detection (__main__.TestNLPProcessing.test_entity_type_detection)
+Test detection of different entity types. ... ok
+test_intent_classification_keywords (__main__.TestNLPProcessing.test_intent_classification_keywords)
+Test intent classification based on keywords. ... ok
+test_query_validation (__main__.TestNLPProcessing.test_query_validation)
+Test query validation and sanitization. ... ok
+
+======================================================================
+FAIL: test_confidence_scoring (__main__.TestNLPProcessing.test_confidence_scoring)
+Test confidence scoring for intent classification.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/tshoush/InfoBlox-UI/tests/test_nlp_processing.py", line 155, in test_confidence_scoring
+    self.assertGreater(confidence, 0.7,
+AssertionError: 0.7 not greater than 0.7 : Clear query 'Update A record for www.example.com' should have high confidence
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.001s
+
+FAILED (failures=1)
+
+--- test_wapi_integration ---
+Test deleting a network via WAPI. ... ok
+test_error_handling (__main__.TestWAPIIntegration.test_error_handling)
+Test error handling for various failure scenarios. ... ok
+test_find_network_api_call (__main__.TestWAPIIntegration.test_find_network_api_call)
+Test finding networks via WAPI. ... ok
+test_intent_generation_from_schema (__main__.TestWAPIIntegration.test_intent_generation_from_schema)
+Test generating intents from WAPI schema. ... ok
+test_network_connectivity_failure (__main__.TestWAPIIntegration.test_network_connectivity_failure)
+Test handling of network connectivity issues. ... ok
+test_schema_fetching (__main__.TestWAPIIntegration.test_schema_fetching)
+Test fetching and parsing WAPI schemas. ... ok
+test_update_network_api_call (__main__.TestWAPIIntegration.test_update_network_api_call)
+Test updating a network via WAPI. ... ok
+test_wapi_connection (__main__.TestWAPIIntegration.test_wapi_connection)
+Test WAPI connection and authentication. ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.057s
+
+OK

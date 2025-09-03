@@ -1,0 +1,15 @@
+{
+  "llm_provider": "basic",
+  "llm_api_key": "",
+  "llm_model": "",
+  "llm_endpoint": "",
+  "confidence_threshold": 0.8,
+  "infoblox_ip": "192.168.1.224",
+  "infoblox_username": "admin",
+  "infoblox_password": "infoblox",
+  "infoblox_wapi_version": "v2.13.1",
+  "infoblox_ssl_verify": false,
+  "enable_autocomplete": true,
+  "enable_logging": true,
+  "max_results": 1000
+}

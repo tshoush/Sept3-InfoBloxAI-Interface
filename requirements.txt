@@ -1,0 +1,42 @@
+# Core Web Framework
+flask==3.0.0
+werkzeug==3.0.0
+
+# InfoBlox WAPI
+requests==2.31.0
+urllib3==2.0.7
+
+# Natural Language Processing
+spacy==3.7.2
+transformers==4.35.0
+torch==2.1.0
+sentence-transformers==2.2.2
+
+# MCP (Model Context Protocol)
+# Note: Install MCP from source if package not available
+# git clone https://github.com/modelcontextprotocol/mcp.git && cd mcp && pip install .
+
+# Vector Database for RAG
+chromadb==0.4.18
+
+# Environment Management
+python-dotenv==1.0.0
+
+# Security
+cryptography==41.0.7
+
+# LLM Providers (Optional)
+openai==1.3.0
+anthropic==0.7.0
+# grok (install separately if needed)
+# ollama (install separately if needed)
+
+# Utilities
+pyyaml==6.0.1
+jsonschema==4.20.0
+
+# Development & Testing
+pytest==7.4.3
+pytest-cov==4.1.0
+black==23.11.0
+flake8==6.1.0

@@ -1,0 +1,21 @@
+{
+  "mcpServers": {
+    "infoblox-wapi": {
+      "command": "python3",
+      "args": ["infoblox_mcp_server.py"],
+      "env": {
+        "INFOBLOX_GRID_MASTER_IP": "192.168.1.224",
+        "INFOBLOX_USERNAME": "admin",
+        "INFOBLOX_PASSWORD": "infoblox",
+        "INFOBLOX_WAPI_VERSION": "v2.13.1"
+      },
+      "description": "InfoBlox WAPI MCP Server with dynamic tool generation and RAG support",
+      "capabilities": {
+        "dynamic_tools": true,
+        "rag_documentation": true,
+        "auto_discovery": true,
+        "schema_caching": true
+      }
+    }
+  }
+}

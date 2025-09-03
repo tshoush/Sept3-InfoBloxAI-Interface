@@ -33,12 +33,20 @@ docker-compose.override.yml
 *~
 .DS_Store
 
+# Environment and Configuration
+.env
+.env.local
+.env.production
+.env.*.local
+
 # Credentials and sensitive data
 grok_config.json
 *_credentials.json
 *.key
 *.pem
 *.crt
+*.p12
+*.pfx
 
 # Data files
 training_data.csv
