@@ -580,126 +580,719 @@ $(document).ready(function() {
 
 # MCP Tools Browser Page
 MCP_TOOLS_TEMPLATE = """
-<div class="main-card">
-    <div class="card-header bg-gradient text-white">
-        <h4><i class="fas fa-tools"></i> MCP Tools Browser</h4>
-    </div>
-    <div class="card-body">
-        <!-- Search and Filters -->
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <input type="text" class="form-control" id="toolSearch" 
-                    placeholder="Search tools...">
-            </div>
-            <div class="col-md-3">
-                <select class="form-control" id="categoryFilter">
-                    <option value="">All Categories</option>
-                    <option value="network">Network</option>
-                    <option value="dns">DNS Records</option>
-                    <option value="dhcp">DHCP</option>
-                    <option value="grid">Grid Management</option>
-                    <option value="custom">Custom Functions</option>
-                </select>
-            </div>
-            <div class="col-md-3">
-                <button class="btn btn-primary" id="refreshTools">
-                    <i class="fas fa-sync"></i> Refresh Tools
-                </button>
+<style>
+    /* MCP Tools Page Styles */
+    .tools-container {
+        display: flex;
+        gap: 25px;
+        margin-top: 20px;
+    }
+    
+    .filters-sidebar {
+        width: 280px;
+        flex-shrink: 0;
+    }
+    
+    .tools-main {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .filter-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .filter-card h6 {
+        color: #495057;
+        font-weight: 600;
+        margin-bottom: 15px;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .filter-checkbox {
+        display: flex;
+        align-items: center;
+        padding: 8px 12px;
+        margin: 5px 0;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .filter-checkbox:hover {
+        background: #f8f9fa;
+    }
+    
+    .filter-checkbox input[type="checkbox"] {
+        margin-right: 10px;
+        cursor: pointer;
+    }
+    
+    .filter-checkbox label {
+        cursor: pointer;
+        margin: 0;
+        font-size: 14px;
+        color: #495057;
+        user-select: none;
+    }
+    
+    .filter-badge {
+        margin-left: auto;
+        background: #e9ecef;
+        color: #495057;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+    
+    .search-box {
+        position: relative;
+        margin-bottom: 25px;
+    }
+    
+    .search-box input {
+        width: 100%;
+        padding: 12px 45px 12px 20px;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        font-size: 15px;
+        transition: all 0.3s;
+    }
+    
+    .search-box input:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .search-box i {
+        position: absolute;
+        right: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #adb5bd;
+    }
+    
+    .stats-bar {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 20px;
+        padding: 15px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 10px;
+        color: white;
+    }
+    
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .stat-item i {
+        font-size: 20px;
+        opacity: 0.8;
+    }
+    
+    .stat-value {
+        font-size: 24px;
+        font-weight: 600;
+    }
+    
+    .stat-label {
+        font-size: 12px;
+        opacity: 0.9;
+    }
+    
+    .tool-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        transition: all 0.3s;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .tool-card:hover {
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+    }
+    
+    .tool-card.expanded {
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    
+    .tool-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+    
+    .tool-name {
+        font-size: 18px;
+        font-weight: 600;
+        color: #2c3e50;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .tool-method {
+        padding: 4px 12px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    
+    .method-get {
+        background: #d1f2eb;
+        color: #0f5132;
+    }
+    
+    .method-post {
+        background: #cff4fc;
+        color: #055160;
+    }
+    
+    .method-put, .method-update {
+        background: #fff3cd;
+        color: #664d03;
+    }
+    
+    .method-delete {
+        background: #f8d7da;
+        color: #842029;
+    }
+    
+    .tool-category {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 600;
+        margin-right: 8px;
+    }
+    
+    .category-ipam {
+        background: #e7f5ff;
+        color: #1864ab;
+    }
+    
+    .category-dns {
+        background: #f3f0ff;
+        color: #5f3dc4;
+    }
+    
+    .category-dhcp {
+        background: #fff0f6;
+        color: #a61e4d;
+    }
+    
+    .tool-description {
+        color: #6c757d;
+        font-size: 14px;
+        margin: 10px 0;
+        line-height: 1.5;
+    }
+    
+    .tool-path {
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+        color: #868e96;
+        background: #f8f9fa;
+        padding: 8px 12px;
+        border-radius: 6px;
+        margin: 10px 0;
+    }
+    
+    .tool-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+    }
+    
+    .tool-expand {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .tool-expand:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+    
+    .tool-testing {
+        display: none;
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 2px solid #e9ecef;
+    }
+    
+    .tool-testing.show {
+        display: block;
+    }
+    
+    .parameter-group {
+        margin-bottom: 20px;
+    }
+    
+    .parameter-label {
+        display: block;
+        color: #495057;
+        font-weight: 500;
+        margin-bottom: 8px;
+        font-size: 14px;
+    }
+    
+    .parameter-required {
+        color: #dc3545;
+        font-weight: 600;
+    }
+    
+    .parameter-input {
+        width: 100%;
+        padding: 10px 15px;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: all 0.3s;
+    }
+    
+    .parameter-input:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .parameter-hint {
+        color: #6c757d;
+        font-size: 12px;
+        margin-top: 5px;
+        font-style: italic;
+    }
+    
+    .execute-button {
+        background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%);
+        color: white;
+        border: none;
+        padding: 10px 24px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .execute-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(55, 178, 77, 0.3);
+    }
+    
+    .execute-button:disabled {
+        background: #adb5bd;
+        cursor: not-allowed;
+        transform: none;
+    }
+    
+    .result-container {
+        margin-top: 20px;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        display: none;
+    }
+    
+    .result-container.show {
+        display: block;
+    }
+    
+    .result-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .result-status {
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    
+    .status-success {
+        background: #d1f2eb;
+        color: #0f5132;
+    }
+    
+    .status-error {
+        background: #f8d7da;
+        color: #842029;
+    }
+    
+    .result-content {
+        background: #2d2d2d;
+        color: #f8f8f2;
+        padding: 15px;
+        border-radius: 8px;
+        font-family: 'Courier New', monospace;
+        font-size: 13px;
+        white-space: pre-wrap;
+        word-break: break-all;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    
+    .loading {
+        text-align: center;
+        color: #667eea;
+        padding: 20px;
+        font-size: 14px;
+    }
+    
+    .loading i {
+        margin-right: 8px;
+    }
+    
+    .result-success {
+        background: #d4edda;
+        border: 1px solid #c3e6cb;
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 15px;
+    }
+    
+    .result-success i {
+        color: #155724;
+        margin-right: 8px;
+    }
+    
+    .result-success pre {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        padding: 12px;
+        margin-top: 10px;
+        font-size: 12px;
+        overflow-x: auto;
+    }
+    
+    .result-error {
+        background: #f8d7da;
+        border: 1px solid #f5c6cb;
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 15px;
+    }
+    
+    .result-error i {
+        color: #721c24;
+        margin-right: 8px;
+    }
+    
+    .result-error pre {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        padding: 12px;
+        margin-top: 10px;
+        font-size: 12px;
+        overflow-x: auto;
+    }
+    
+    .no-tools {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6c757d;
+    }
+    
+    .no-tools i {
+        font-size: 48px;
+        color: #dee2e6;
+        margin-bottom: 20px;
+    }
+    
+    .clear-filters {
+        color: #667eea;
+        cursor: pointer;
+        font-size: 13px;
+        text-decoration: underline;
+    }
+    
+    .clear-filters:hover {
+        color: #764ba2;
+    }
+</style>
+
+<div class="tools-container">
+    <!-- Filters Sidebar -->
+    <div class="filters-sidebar">
+        <!-- Search -->
+        <div class="filter-card">
+            <div class="search-box">
+                <input type="text" id="toolSearch" placeholder="Search tools...">
+                <i class="fas fa-search"></i>
             </div>
         </div>
         
-        <!-- Tools Count -->
-        <div class="alert alert-info">
-            <i class="fas fa-info-circle"></i> 
-            Discovered <strong>{{ tools|length }}</strong> tools from WAPI schemas
-            {% if last_update %}
-            <small class="float-end">Last updated: {{ last_update }}</small>
-            {% endif %}
+        <!-- Category Filter -->
+        <div class="filter-card">
+            <h6><i class="fas fa-layer-group"></i> Categories</h6>
+            <div class="filter-checkbox">
+                <input type="checkbox" id="cat-ipam" value="ipam" checked>
+                <label for="cat-ipam">IPAM</label>
+                <span class="filter-badge" id="count-ipam">0</span>
+            </div>
+            <div class="filter-checkbox">
+                <input type="checkbox" id="cat-dns" value="dns" checked>
+                <label for="cat-dns">DNS</label>
+                <span class="filter-badge" id="count-dns">0</span>
+            </div>
+            <div class="filter-checkbox">
+                <input type="checkbox" id="cat-dhcp" value="dhcp" checked>
+                <label for="cat-dhcp">DHCP</label>
+                <span class="filter-badge" id="count-dhcp">0</span>
+            </div>
+            <div class="filter-checkbox">
+                <input type="checkbox" id="cat-grid" value="grid" checked>
+                <label for="cat-grid">Grid</label>
+                <span class="filter-badge" id="count-grid">0</span>
+            </div>
+            <div class="filter-checkbox">
+                <input type="checkbox" id="cat-other" value="other" checked>
+                <label for="cat-other">Other</label>
+                <span class="filter-badge" id="count-other">0</span>
+            </div>
+        </div>
+        
+        <!-- Operation Filter -->
+        <div class="filter-card">
+            <h6><i class="fas fa-code"></i> Operations</h6>
+            <div class="filter-checkbox">
+                <input type="checkbox" id="op-get" value="GET" checked>
+                <label for="op-get">GET</label>
+                <span class="filter-badge" id="count-get">0</span>
+            </div>
+            <div class="filter-checkbox">
+                <input type="checkbox" id="op-post" value="POST" checked>
+                <label for="op-post">POST</label>
+                <span class="filter-badge" id="count-post">0</span>
+            </div>
+            <div class="filter-checkbox">
+                <input type="checkbox" id="op-put" value="PUT" checked>
+                <label for="op-put">PUT/UPDATE</label>
+                <span class="filter-badge" id="count-put">0</span>
+            </div>
+            <div class="filter-checkbox">
+                <input type="checkbox" id="op-delete" value="DELETE" checked>
+                <label for="op-delete">DELETE</label>
+                <span class="filter-badge" id="count-delete">0</span>
+            </div>
+            <div class="mt-3">
+                <span class="clear-filters" onclick="clearAllFilters()">Clear all filters</span>
+            </div>
+        </div>
+        
+        <!-- Actions -->
+        <div class="filter-card">
+            <button class="btn btn-primary w-100 mb-2" onclick="refreshTools()">
+                <i class="fas fa-sync"></i> Refresh Tools
+            </button>
+            <button class="btn btn-secondary w-100" onclick="startMCPServer()">
+                <i class="fas fa-server"></i> Start MCP Server
+            </button>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="tools-main">
+        <!-- Statistics Bar -->
+        <div class="stats-bar">
+            <div class="stat-item">
+                <i class="fas fa-tools"></i>
+                <div>
+                    <div class="stat-value" id="totalTools">0</div>
+                    <div class="stat-label">Total Tools</div>
+                </div>
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-filter"></i>
+                <div>
+                    <div class="stat-value" id="visibleTools">0</div>
+                    <div class="stat-label">Filtered</div>
+                </div>
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-clock"></i>
+                <div>
+                    <div class="stat-value" id="lastUpdate">Never</div>
+                    <div class="stat-label">Last Update</div>
+                </div>
+            </div>
         </div>
         
         <!-- Tools List -->
         <div id="toolsList">
-            {% for category, category_tools in tools_by_category.items() %}
-            <div class="tool-category">
-                <h5 class="mb-0">
-                    <i class="fas fa-folder"></i> {{ category|title }} 
-                    <span class="badge bg-light text-dark">{{ category_tools|length }}</span>
-                </h5>
+            <!-- Sample Network/IPAM Tools -->
+            <div class="tool-card" data-category="ipam" data-method="GET" data-tool="get_network">
+                <div class="tool-header">
+                    <div class="tool-name">
+                        <span class="tool-category category-ipam">IPAM</span>
+                        get_network
+                    </div>
+                    <span class="tool-method method-get">GET</span>
+                </div>
+                <div class="tool-description">
+                    Retrieve network information from InfoBlox. Search by network CIDR or retrieve all networks.
+                </div>
+                <div class="tool-path">/wapi/v2.13.1/network</div>
+                <div class="tool-actions">
+                    <button class="tool-expand" onclick="toggleTool('get_network')">
+                        <i class="fas fa-play"></i> Test Tool
+                    </button>
+                </div>
+                <div class="tool-testing" id="test-get_network" style="display: none;">
+                    <h6>Parameters</h6>
+                    <div class="parameter-group">
+                        <label class="parameter-label">
+                            Network <span class="text-muted">(optional)</span>
+                        </label>
+                        <input type="text" class="parameter-input" id="param-get_network-network" 
+                            placeholder="e.g., 10.0.0.0/24">
+                        <div class="parameter-hint">Enter network in CIDR notation or leave empty to get all networks</div>
+                    </div>
+                    <div class="parameter-group">
+                        <label class="parameter-label">
+                            Max Results <span class="text-muted">(optional)</span>
+                        </label>
+                        <input type="number" class="parameter-input" id="param-get_network-max_results" 
+                            placeholder="50" value="50">
+                        <div class="parameter-hint">Maximum number of results to return</div>
+                    </div>
+                    <button class="execute-button" onclick="executeTool('get_network', 'GET')">
+                        <i class="fas fa-rocket"></i> Execute Query
+                    </button>
+                    <div class="result-container" id="result-get_network"></div>
+                </div>
             </div>
             
-            {% for tool in category_tools %}
-            <div class="tool-card" data-tool="{{ tool.name }}" data-category="{{ category }}">
-                <div class="row">
-                    <div class="col-md-8">
-                        <h6 class="text-primary">
-                            <i class="fas fa-wrench"></i> {{ tool.name }}
-                        </h6>
-                        <p class="mb-2">{{ tool.description }}</p>
-                        {% if tool.example %}
-                        <small class="text-muted">
-                            <i class="fas fa-lightbulb"></i> Example: {{ tool.example }}
-                        </small>
-                        {% endif %}
+            <!-- Sample DNS Tool -->
+            <div class="tool-card" data-category="dns" data-method="POST" data-tool="create_a_record">
+                <div class="tool-header">
+                    <div class="tool-name">
+                        <span class="tool-category category-dns">DNS</span>
+                        create_a_record
                     </div>
-                    <div class="col-md-4 text-end">
-                        <button class="btn btn-sm btn-outline-primary test-tool" 
-                            data-tool="{{ tool.name }}">
-                            <i class="fas fa-play"></i> Test
-                        </button>
-                        <button class="btn btn-sm btn-outline-secondary view-schema" 
-                            data-tool="{{ tool.name }}">
-                            <i class="fas fa-code"></i> Schema
-                        </button>
-                    </div>
+                    <span class="tool-method method-post">POST</span>
                 </div>
-                
-                <!-- Parameters (hidden by default) -->
-                <div class="tool-params mt-3" id="params-{{ tool.name }}" style="display: none;">
-                    <h6>Parameters:</h6>
-                    {% for param in tool.parameters %}
-                    <div class="parameter-input">
-                        <label class="form-label">
-                            {{ param.name }}
-                            {% if param.required %}<span class="text-danger">*</span>{% endif %}
-                            <small class="text-muted">{{ param.type }}</small>
+                <div class="tool-description">
+                    Create a new DNS A record in the specified zone.
+                </div>
+                <div class="tool-path">/wapi/v2.13.1/record:a</div>
+                <div class="tool-actions">
+                    <button class="tool-expand" onclick="toggleTool('create_a_record')">
+                        <i class="fas fa-play"></i> Test Tool
+                    </button>
+                </div>
+                <div class="tool-testing" id="test-create_a_record" style="display: none;">
+                    <h6>Parameters</h6>
+                    <div class="parameter-group">
+                        <label class="parameter-label">
+                            Hostname <span class="parameter-required">*</span>
                         </label>
-                        {% if param.type == 'boolean' %}
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" 
-                                id="param-{{ tool.name }}-{{ param.name }}">
-                        </div>
-                        {% elif param.type == 'select' %}
-                        <select class="form-control" id="param-{{ tool.name }}-{{ param.name }}">
-                            {% for option in param.options %}
-                            <option value="{{ option }}">{{ option }}</option>
-                            {% endfor %}
-                        </select>
-                        {% else %}
-                        <input type="text" class="form-control" 
-                            id="param-{{ tool.name }}-{{ param.name }}"
-                            placeholder="{{ param.description }}">
-                        {% endif %}
+                        <input type="text" class="parameter-input" id="param-create_a_record-name" 
+                            placeholder="e.g., server1.example.com" required>
+                        <div class="parameter-hint">Fully qualified domain name for the A record</div>
                     </div>
-                    {% endfor %}
-                    
-                    <div class="mt-3">
-                        <button class="btn btn-success execute-tool" data-tool="{{ tool.name }}">
-                            <i class="fas fa-rocket"></i> Execute
-                        </button>
-                        <button class="btn btn-secondary cancel-test" data-tool="{{ tool.name }}">
-                            Cancel
-                        </button>
+                    <div class="parameter-group">
+                        <label class="parameter-label">
+                            IP Address <span class="parameter-required">*</span>
+                        </label>
+                        <input type="text" class="parameter-input" id="param-create_a_record-ipv4addr" 
+                            placeholder="e.g., 192.168.1.100" required>
+                        <div class="parameter-hint">IPv4 address for the A record</div>
                     </div>
-                </div>
-                
-                <!-- Results (hidden by default) -->
-                <div class="tool-results mt-3" id="results-{{ tool.name }}" style="display: none;">
-                    <h6>Results:</h6>
-                    <pre class="code-block"><code class="language-json"></code></pre>
+                    <div class="parameter-group">
+                        <label class="parameter-label">
+                            TTL <span class="text-muted">(optional)</span>
+                        </label>
+                        <input type="number" class="parameter-input" id="param-create_a_record-ttl" 
+                            placeholder="3600">
+                        <div class="parameter-hint">Time to live in seconds (default: 3600)</div>
+                    </div>
+                    <div class="parameter-group">
+                        <label class="parameter-label">
+                            Comment <span class="text-muted">(optional)</span>
+                        </label>
+                        <input type="text" class="parameter-input" id="param-create_a_record-comment" 
+                            placeholder="e.g., Web server">
+                        <div class="parameter-hint">Description or notes about this record</div>
+                    </div>
+                    <button class="execute-button" onclick="executeTool('create_a_record', 'POST')">
+                        <i class="fas fa-plus"></i> Create Record
+                    </button>
+                    <div class="result-container" id="result-create_a_record"></div>
                 </div>
             </div>
-            {% endfor %}
-            {% endfor %}
+            
+            <!-- Sample DHCP Tool -->
+            <div class="tool-card" data-category="dhcp" data-method="GET" data-tool="get_dhcp_range">
+                <div class="tool-header">
+                    <div class="tool-name">
+                        <span class="tool-category category-dhcp">DHCP</span>
+                        get_dhcp_range
+                    </div>
+                    <span class="tool-method method-get">GET</span>
+                </div>
+                <div class="tool-description">
+                    Get DHCP range information from InfoBlox.
+                </div>
+                <div class="tool-path">/wapi/v2.13.1/range</div>
+                <div class="tool-actions">
+                    <button class="tool-expand" onclick="toggleTool('get_dhcp_range')">
+                        <i class="fas fa-play"></i> Test Tool
+                    </button>
+                </div>
+                <div class="tool-testing" id="test-get_dhcp_range" style="display: none;">
+                    <h6>Parameters</h6>
+                    <div class="parameter-group">
+                        <label class="parameter-label">
+                            Network <span class="text-muted">(optional)</span>
+                        </label>
+                        <input type="text" class="parameter-input" id="param-get_dhcp_range-network" 
+                            placeholder="e.g., 10.0.0.0/24">
+                        <div class="parameter-hint">Filter by network (CIDR notation)</div>
+                    </div>
+                    <button class="execute-button" onclick="executeTool('get_dhcp_range', 'GET')">
+                        <i class="fas fa-search"></i> Get DHCP Ranges
+                    </button>
+                    <div class="result-container" id="result-get_dhcp_range"></div>
+                </div>
+            </div>
+            
+            <!-- No Tools Message (hidden by default) -->
+            <div class="no-tools" id="noToolsMessage" style="display:none;">
+                <i class="fas fa-inbox"></i>
+                <h5>No tools found</h5>
+                <p>Try adjusting your filters or start the MCP server to discover tools.</p>
+            </div>
         </div>
         
         <!-- Tool Schema Modal -->
@@ -720,97 +1313,224 @@ MCP_TOOLS_TEMPLATE = """
 </div>
 
 <script>
+// Global state
+let activeFilters = {
+    categories: [],
+    methods: [],
+    search: ''
+};
+
+// Toggle tool testing interface
+function toggleTool(toolName) {
+    const testDiv = document.getElementById('test-' + toolName);
+    if (testDiv.style.display === 'none' || !testDiv.style.display) {
+        testDiv.style.display = 'block';
+    } else {
+        testDiv.style.display = 'none';
+    }
+}
+
+// Execute tool with parameters
+function executeTool(toolName, method) {
+    const resultDiv = document.getElementById('result-' + toolName);
+    
+    // Show loading state
+    resultDiv.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Executing...</div>';
+    resultDiv.style.display = 'block';
+    
+    // Collect parameters
+    const params = {};
+    const inputs = document.querySelectorAll(`[id^="param-${toolName}-"]`);
+    inputs.forEach(input => {
+        const paramName = input.id.replace(`param-${toolName}-`, '');
+        const value = input.value;
+        if (value) {
+            params[paramName] = value;
+        }
+    });
+    
+    // Build request payload
+    const payload = {
+        tool: toolName,
+        method: method,
+        parameters: params
+    };
+    
+    // Execute API call
+    fetch('/api/process_query', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            query: `Execute ${toolName} with params: ${JSON.stringify(params)}`
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Display results
+        if (data.error) {
+            resultDiv.innerHTML = `
+                <div class="result-error">
+                    <i class="fas fa-exclamation-circle"></i> Error
+                    <pre>${JSON.stringify(data.error, null, 2)}</pre>
+                </div>
+            `;
+        } else {
+            resultDiv.innerHTML = `
+                <div class="result-success">
+                    <i class="fas fa-check-circle"></i> Success
+                    <pre>${JSON.stringify(data.result || data, null, 2)}</pre>
+                </div>
+            `;
+        }
+    })
+    .catch(error => {
+        resultDiv.innerHTML = `
+            <div class="result-error">
+                <i class="fas fa-exclamation-circle"></i> Request Failed
+                <pre>${error.message}</pre>
+            </div>
+        `;
+    });
+}
+
+// Apply filters to tools
+function applyFilters() {
+    const tools = document.querySelectorAll('.tool-card');
+    let visibleCount = 0;
+    
+    tools.forEach(tool => {
+        const category = tool.dataset.category;
+        const method = tool.dataset.method;
+        const toolName = tool.dataset.tool.toLowerCase();
+        
+        // Check category filter
+        let categoryMatch = activeFilters.categories.length === 0 || 
+                           activeFilters.categories.includes(category);
+        
+        // Check method filter
+        let methodMatch = activeFilters.methods.length === 0 || 
+                         activeFilters.methods.includes(method);
+        
+        // Check search filter
+        let searchMatch = activeFilters.search === '' || 
+                         toolName.includes(activeFilters.search.toLowerCase());
+        
+        // Show/hide tool based on all filters
+        if (categoryMatch && methodMatch && searchMatch) {
+            tool.style.display = 'block';
+            visibleCount++;
+        } else {
+            tool.style.display = 'none';
+        }
+    });
+    
+    // Update stats
+    document.getElementById('visibleTools').textContent = visibleCount;
+    
+    // Show/hide no tools message
+    const noToolsMessage = document.getElementById('noToolsMessage');
+    if (visibleCount === 0) {
+        noToolsMessage.style.display = 'block';
+    } else {
+        noToolsMessage.style.display = 'none';
+    }
+}
+
+// Initialize when document is ready
 $(document).ready(function() {
-    // Search functionality
+    // Update total tools count
+    const totalTools = $('.tool-card').length;
+    $('#totalTools').text(totalTools);
+    $('#visibleTools').text(totalTools);
+    
+    // Category filter checkboxes
+    $('.filter-category input[type="checkbox"]').change(function() {
+        activeFilters.categories = [];
+        $('.filter-category input:checked').each(function() {
+            activeFilters.categories.push($(this).val());
+        });
+        applyFilters();
+    });
+    
+    // Method filter checkboxes
+    $('.filter-method input[type="checkbox"]').change(function() {
+        activeFilters.methods = [];
+        $('.filter-method input:checked').each(function() {
+            activeFilters.methods.push($(this).val());
+        });
+        applyFilters();
+    });
+    
+    // Search filter
     $('#toolSearch').on('input', function() {
-        const search = $(this).val().toLowerCase();
-        $('.tool-card').each(function() {
-            const name = $(this).data('tool').toLowerCase();
-            const visible = name.includes(search);
-            $(this).toggle(visible);
-        });
+        activeFilters.search = $(this).val();
+        applyFilters();
     });
     
-    // Category filter
-    $('#categoryFilter').change(function() {
-        const category = $(this).val();
-        $('.tool-card').each(function() {
-            if (category === '' || $(this).data('category') === category) {
-                $(this).show();
-            } else {
-                $(this).hide();
-            }
-        });
-    });
-    
-    // Test tool
-    $('.test-tool').click(function() {
-        const toolName = $(this).data('tool');
-        $('#params-' + toolName).slideToggle();
-        $('#results-' + toolName).hide();
-    });
-    
-    // View schema
-    $('.view-schema').click(function() {
-        const toolName = $(this).data('tool');
-        $.get('/api/mcp/tool-schema/' + toolName, function(schema) {
-            $('#schemaContent').text(JSON.stringify(schema, null, 2));
-            Prism.highlightElement($('#schemaContent')[0]);
-            $('#schemaModal').modal('show');
-        });
-    });
-    
-    // Execute tool
-    $('.execute-tool').click(function() {
-        const toolName = $(this).data('tool');
-        const params = {};
+    // Clear filters button
+    $('#clearFilters').click(function() {
+        // Uncheck all checkboxes
+        $('.filter-category input[type="checkbox"]').prop('checked', false);
+        $('.filter-method input[type="checkbox"]').prop('checked', false);
         
-        // Collect parameters
-        $('[id^="param-' + toolName + '-"]').each(function() {
-            const paramName = $(this).attr('id').replace('param-' + toolName + '-', '');
-            if ($(this).is(':checkbox')) {
-                params[paramName] = $(this).is(':checked');
-            } else {
-                params[paramName] = $(this).val();
-            }
-        });
+        // Clear search
+        $('#toolSearch').val('');
         
-        // Execute
-        $.ajax({
-            url: '/api/mcp/execute-tool',
-            method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify({
-                tool: toolName,
-                parameters: params
-            }),
-            success: function(result) {
-                $('#results-' + toolName + ' code').text(JSON.stringify(result, null, 2));
-                Prism.highlightElement($('#results-' + toolName + ' code')[0]);
-                $('#results-' + toolName).show();
-            },
-            error: function(xhr) {
-                $('#results-' + toolName + ' code').text('Error: ' + xhr.responseText);
-                $('#results-' + toolName).show();
-            }
-        });
+        // Reset active filters
+        activeFilters = {
+            categories: [],
+            methods: [],
+            search: ''
+        };
+        
+        // Apply filters (show all)
+        applyFilters();
     });
     
-    // Cancel test
-    $('.cancel-test').click(function() {
-        const toolName = $(this).data('tool');
-        $('#params-' + toolName).hide();
-        $('#results-' + toolName).hide();
-    });
-    
-    // Refresh tools
+    // Refresh tools button
     $('#refreshTools').click(function() {
-        $(this).prop('disabled', true);
-        $.post('/api/mcp/refresh-tools', function(result) {
-            location.reload();
-        });
+        const btn = $(this);
+        btn.prop('disabled', true);
+        btn.html('<i class="fas fa-spinner fa-spin"></i> Refreshing...');
+        
+        // Simulate refresh (in real app, this would call MCP API)
+        setTimeout(() => {
+            // Update last update time
+            const now = new Date().toLocaleTimeString();
+            $('#lastUpdate').text(now);
+            
+            // Re-enable button
+            btn.prop('disabled', false);
+            btn.html('<i class="fas fa-sync"></i> Refresh');
+            
+            // Show success message
+            showNotification('Tools refreshed successfully', 'success');
+        }, 1500);
     });
+    
+    // Initialize last update time
+    $('#lastUpdate').text(new Date().toLocaleTimeString());
 });
+
+// Show notification
+function showNotification(message, type) {
+    const notification = $(`
+        <div class="alert alert-${type} alert-dismissible fade show position-fixed" 
+             style="top: 80px; right: 20px; z-index: 9999;">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `);
+    
+    $('body').append(notification);
+    
+    // Auto-dismiss after 3 seconds
+    setTimeout(() => {
+        notification.alert('close');
+    }, 3000);
+}
 </script>
 """
 
@@ -866,38 +1586,48 @@ def discover_mcp_tools():
     
     tools = []
     
-    # Try to get tools from MCP server
+    # Try to load generated tools first
     try:
-        # This would normally connect to the MCP server
-        # For now, we'll simulate with cached data
-        cache_dir = Path.home() / '.infoblox_mcp' / 'cache'
-        
-        if cache_dir.exists():
-            for schema_file in cache_dir.glob('*_schema.json'):
-                with open(schema_file) as f:
-                    schema = json.load(f)
-                    obj_name = schema.get('object_name', schema_file.stem.replace('_schema', ''))
-                    
-                    # Generate tools based on operations
-                    if schema.get('supports_crud', {}).get('create'):
-                        tools.append({
-                            'name': f"create_{obj_name.replace(':', '_')}",
-                            'description': f"Create a new {obj_name} object",
-                            'category': get_tool_category(obj_name),
-                            'example': f"Create {obj_name}",
-                            'parameters': get_tool_parameters(schema, 'create')
-                        })
-                    
-                    if schema.get('supports_crud', {}).get('read'):
-                        tools.append({
-                            'name': f"find_{obj_name.replace(':', '_')}",
-                            'description': f"Search for {obj_name} objects",
-                            'category': get_tool_category(obj_name),
-                            'example': f"Find all {obj_name}",
-                            'parameters': get_tool_parameters(schema, 'find')
-                        })
+        tools_file = Path.home() / '.infoblox_mcp' / 'tools' / 'discovered_tools.json'
+        if tools_file.exists():
+            with open(tools_file) as f:
+                data = json.load(f)
+                tools = data.get('tools', [])
+                logger.info(f"Loaded {len(tools)} tools from {tools_file}")
     except Exception as e:
-        logger.error(f"Error discovering MCP tools: {e}")
+        logger.error(f"Error loading generated tools: {e}")
+    
+    # Try to get tools from MCP server cache as fallback
+    if not tools:
+        try:
+            cache_dir = Path.home() / '.infoblox_mcp' / 'cache'
+            
+            if cache_dir.exists():
+                for schema_file in cache_dir.glob('*_schema.json'):
+                    with open(schema_file) as f:
+                        schema = json.load(f)
+                        obj_name = schema.get('object_name', schema_file.stem.replace('_schema', ''))
+                        
+                        # Generate tools based on operations
+                        if schema.get('supports_crud', {}).get('create'):
+                            tools.append({
+                                'name': f"create_{obj_name.replace(':', '_')}",
+                                'description': f"Create a new {obj_name} object",
+                                'category': get_tool_category(obj_name),
+                                'example': f"Create {obj_name}",
+                                'parameters': get_tool_parameters(schema, 'create')
+                            })
+                        
+                        if schema.get('supports_crud', {}).get('read'):
+                            tools.append({
+                                'name': f"find_{obj_name.replace(':', '_')}",
+                                'description': f"Search for {obj_name} objects",
+                                'category': get_tool_category(obj_name),
+                                'example': f"Find all {obj_name}",
+                                'parameters': get_tool_parameters(schema, 'find')
+                            })
+        except Exception as e:
+            logger.error(f"Error discovering MCP tools from cache: {e}")
     
     # Add default tools if no discovery
     if not tools:
@@ -1684,16 +2414,235 @@ def mcp_tools_page():
     tools = discover_mcp_tools()
     tools_by_category = organize_tools_by_category(tools)
     
-    # Use a modified template with the MCP content embedded
-    template = ENHANCED_TEMPLATE.replace('{% block content %}{% endblock %}', 
-                                         '{% block content %}' + MCP_TOOLS_TEMPLATE + '{% endblock %}')
-    return render_template_string(
-        template,
-        page='mcp-tools',
-        tools=tools,
-        tools_by_category=tools_by_category,
-        last_update=MCP_LAST_REFRESH
-    )
+    # Generate dynamic HTML for tools
+    from generate_tools_html import generate_tools_html
+    tools_html = generate_tools_html(tools)
+    
+    # Replace the sample tools in the template with actual tools
+    template_with_tools = MCP_TOOLS_TEMPLATE
+    
+    # Find and replace the sample tools section
+    start_marker = '<!-- Sample Network/IPAM Tools -->'
+    end_marker = '<!-- No Tools Message (hidden by default) -->'
+    
+    if start_marker in template_with_tools and end_marker in template_with_tools:
+        start_idx = template_with_tools.find(start_marker)
+        end_idx = template_with_tools.find(end_marker)
+        
+        # Replace the sample tools with dynamically generated tools
+        template_with_tools = (
+            template_with_tools[:start_idx] +
+            '<!-- Dynamically Generated Tools -->\n' +
+            tools_html + '\n' +
+            template_with_tools[end_idx:]
+        )
+    
+    # Render the complete MCP Tools page with embedded template
+    full_page = '''
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InfoBlox AI - MCP Tools</title>
+    
+    <!-- jQuery first -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <style>
+        /* Enhanced Header Styles */
+        body {
+            padding-top: 60px;
+            font-family: 'Inter', -apple-system, system-ui, sans-serif;
+            background: #f8f9fa;
+        }
+        
+        .main-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            z-index: 1030;
+            display: flex;
+            align-items: center;
+            padding: 0 30px;
+        }
+        
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+        
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: #333;
+        }
+        
+        .brand-logo {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .brand-text {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+        
+        .header-nav {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .nav-pill {
+            padding: 6px 16px;
+            border-radius: 20px;
+            background: transparent;
+            color: #666;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .nav-pill:hover {
+            background: #f0f0f0;
+            color: #333;
+        }
+        
+        .nav-pill.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            font-size: 12px;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #dc3545;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-dot.connected {
+            background: #28a745;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* Content Area */
+        .content-wrapper {
+            padding: 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+    </style>
+    
+    ''' + template_with_tools + '''
+</head>
+<body>
+    <!-- Fixed Header -->
+    <header class="main-header">
+        <div class="header-content">
+            <div class="header-left">
+                <a href="/" class="header-brand">
+                    <div class="brand-logo">IB</div>
+                    <div class="brand-text">InfoBlox AI</div>
+                </a>
+                <nav class="header-nav">
+                    <a href="/" class="nav-pill">Query</a>
+                    <a href="/config" class="nav-pill">Config</a>
+                    <a href="/mcp-config" class="nav-pill">MCP Config</a>
+                    <a href="/mcp-tools" class="nav-pill active">MCP Tools</a>
+                </nav>
+            </div>
+            <div class="header-right">
+                <div class="status-indicator">
+                    <span class="status-dot" id="infoblox-status"></span>
+                    <span>InfoBlox</span>
+                </div>
+                <div class="status-indicator">
+                    <span class="status-dot" id="mcp-status"></span>
+                    <span>MCP</span>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main Content -->
+    <div class="content-wrapper">
+        <div class="page-header mb-4">
+            <h4><i class="fas fa-tools"></i> MCP Tools Browser</h4>
+            <p class="text-muted">Explore and test InfoBlox API tools</p>
+        </div>
+        
+        <!-- Tools content will be rendered here -->
+        <div id="mcp-tools-content"></div>
+    </div>
+    
+    <script>
+        // Initialize the MCP tools content
+        $(document).ready(function() {
+            $('#mcp-tools-content').html($('.tools-container').parent().html());
+        });
+    </script>
+</body>
+</html>
+    '''
+    
+    return full_page
 
 # API Endpoints
 
@@ -1798,6 +2747,17 @@ def execute_tool():
 @app.route('/api/mcp/refresh-tools', methods=['POST'])
 def refresh_tools():
     """Refresh tool list."""
+    # Run the generator script to update tools
+    try:
+        import subprocess
+        result = subprocess.run(['python3', 'generate_mcp_tools.py'], 
+                              capture_output=True, text=True, timeout=10)
+        if result.returncode == 0:
+            logger.info("Successfully generated new tools")
+    except Exception as e:
+        logger.error(f"Error generating tools: {e}")
+    
+    # Reload the tools
     discover_mcp_tools()
     return jsonify({'success': True, 'tools_count': len(MCP_TOOLS_CACHE)})
 

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test MCP Buttons</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h2>Testing MCP Tools Button Functionality</h2>
+    
+    <iframe id="mcpFrame" src="http://localhost:5002/mcp-tools" width="100%" height="600"></iframe>
+    
+    <div id="results">
+        <h3>Test Results:</h3>
+        <ul id="testResults"></ul>
+    </div>
+    
+    <script>
+        $(document).ready(function() {
+            setTimeout(function() {
+                // Access iframe content
+                var iframe = document.getElementById('mcpFrame');
+                var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                
+                // Test if functions are defined
+                var tests = [
+                    {
+                        name: "toggleTool function exists",
+                        test: function() {
+                            return typeof iframe.contentWindow.toggleTool === 'function';
+                        }
+                    },
+                    {
+                        name: "executeTool function exists", 
+                        test: function() {
+                            return typeof iframe.contentWindow.executeTool === 'function';
+                        }
+                    },
+                    {
+                        name: "applyFilters function exists",
+                        test: function() {
+                            return typeof iframe.contentWindow.applyFilters === 'function';
+                        }
+                    },
+                    {
+                        name: "jQuery is loaded",
+                        test: function() {
+                            return typeof iframe.contentWindow.$ === 'function';
+                        }
+                    },
+                    {
+                        name: "Tool cards are present",
+                        test: function() {
+                            return $(iframeDoc).find('.tool-card').length > 0;
+                        }
+                    },
+                    {
+                        name: "Test buttons are present",
+                        test: function() {
+                            return $(iframeDoc).find('.tool-expand').length > 0;
+                        }
+                    }
+                ];
+                
+                tests.forEach(function(test) {
+                    try {
+                        var result = test.test();
+                        $('#testResults').append('<li>' + test.name + ': ' + (result ? '✓ PASS' : '✗ FAIL') + '</li>');
+                    } catch(e) {
+                        $('#testResults').append('<li>' + test.name + ': ✗ ERROR - ' + e.message + '</li>');
+                    }
+                });
+                
+                // Try clicking a button
+                try {
+                    var firstButton = $(iframeDoc).find('.tool-expand').first();
+                    if (firstButton.length > 0) {
+                        firstButton.click();
+                        $('#testResults').append('<li>Button click test: ✓ Clicked successfully</li>');
+                        
+                        // Check if tool expanded
+                        setTimeout(function() {
+                            var toolDiv = $(iframeDoc).find('.tool-testing').first();
+                            var isVisible = toolDiv.css('display') !== 'none';
+                            $('#testResults').append('<li>Tool expanded: ' + (isVisible ? '✓ YES' : '✗ NO') + '</li>');
+                        }, 500);
+                    } else {
+                        $('#testResults').append('<li>Button click test: ✗ No buttons found</li>');
+                    }
+                } catch(e) {
+                    $('#testResults').append('<li>Button click test: ✗ ERROR - ' + e.message + '</li>');
+                }
+                
+            }, 2000); // Wait for iframe to load
+        });
+    </script>
+</body>
+</html>
